@@ -1,6 +1,6 @@
 #!/usr/bin/env make
 #
-# This is a tomato, an exercise to train to be a programmer.
+# This is tomato, exercise to train to be a programmer.
 
 # ------------------------------------------------------------------------
 #
@@ -36,7 +36,7 @@ THIS_MAKEFILE := $(call WHERE-AM-I)
 HELPTEXT = $(call ACTION_MESSAGE, $(shell egrep "^\# target: $(1) " $(THIS_MAKEFILE) | sed "s/\# target: $(1)[ ]*-[ ]* / /g"))
 
 # Check version  and path to command and display on one line
-CHECK_VERSION = printf "%-30s %-13s\n" "$(1)" "`$(1) --version $(2)`"
+CHECK_VERSION = printf "%-25s %-13s\n" "$(1)" "`$(1) --version $(2)`"
 
 # Get current working directory, it may not exist as environment variable.
 PWD = $(shell pwd)
@@ -69,13 +69,16 @@ SRC     := src
 # PHP
 VENDOR  := vendor
 VBIN    := vendor/bin
+PHP     := php
 PHPCS   := $(BIN)/phpcs
 PHPCBF  := $(BIN)/phpcbf
 PHPMD   := $(BIN)/phpmd
 PHPSTAN := $(VBIN)/phpstan
 
 # JavaScript
-ESLINT := node_modules/.bin/eslint
+NODE   := node
+NPM    := npm
+ESLINT := npx eslint #node_modules/.bin/eslint
 
 
 
@@ -88,7 +91,7 @@ ESLINT := node_modules/.bin/eslint
 prepare:
 	@$(call HELPTEXT,$@)
 	install -d -m 0755 $(BUILD)
-	rm $(BUILD)/*
+	rm -f $(BUILD)/*
 
 
 
@@ -111,20 +114,10 @@ install:
 
 # target: check                   - Check installed utilities.
 .PHONY: check
-check:
+check: check-js check-php
 	@$(call HELPTEXT,$@)
-
-	# General
+	@$(call CHECK_VERSION, bash, | head -1)
 	@$(call CHECK_VERSION, make, | head -1)
-
-	# PHP
-	@[ ! -f .phpcs.xml ] || $(call CHECK_VERSION, $(PHPCS), | head -1)
-	@[ ! -f .phpcs.xml ] || $(call CHECK_VERSION, $(PHPCBF), | head -1)
-	@[ ! -f .phpmd.xml ] || $(call CHECK_VERSION, $(PHPMD), | head -1)
-	@[ ! -f .phpstan.neon ] || $(call CHECK_VERSION, $(PHPSTAN), | head -1)
-
-	# JavaScript
-	@[ ! -f .eslintrc.json ] || $(call CHECK_VERSION, $(ESLINT), | head -1)
 
 
 
@@ -157,6 +150,30 @@ clean-all: clean
 #
 # PHP specific targets
 #
+# target: install-php             - Install PHP utilities.
+.PHONY: install-php
+install-php:
+ifneq (,$(wildcard package.json))
+	@$(call HELPTEXT,$@)
+	npm install
+endif
+
+
+
+# target: check-php               - Check PHP utilities.
+.PHONY: check-php
+check-php:
+ifneq (,$(wildcard .php*))
+	@$(call HELPTEXT,$@)
+	@[ ! -f .phpcs.xml ] || $(call CHECK_VERSION, $(PHP), | head -1)
+	@[ ! -f .phpcs.xml ] || $(call CHECK_VERSION, $(PHPCS), | head -1)
+	@[ ! -f .phpcs.xml ] || $(call CHECK_VERSION, $(PHPCBF), | head -1)
+	@[ ! -f .phpmd.xml ] || $(call CHECK_VERSION, $(PHPMD), | head -1)
+	@[ ! -f .phpstan.neon ] || $(call CHECK_VERSION, $(PHPSTAN), | head -1)
+endif
+
+
+
 # target: phpcs                   - PHP code style using phpcs.
 .PHONY: phpcs
 phpcs: prepare
@@ -199,6 +216,28 @@ endif
 #
 # JavaScript specific targets
 #
+# target: install-js              - Install JavaScript utilities.
+.PHONY: install-js
+install-js:
+ifneq (,$(wildcard package.json))
+	@$(call HELPTEXT,$@)
+	npm install
+endif
+
+
+
+# target: check-js                - Check JavaScript utilities.
+.PHONY: check-js
+check-js:
+ifneq (,$(wildcard .eslintrc.json))
+	@$(call HELPTEXT,$@)
+	@$(call CHECK_VERSION, $(NODE), | head -1)
+	@$(call CHECK_VERSION, $(NPM), | head -1)
+	@[ ! -f .eslintrc.json ] || $(call CHECK_VERSION, $(ESLINT), | head -1)
+endif
+
+
+
 # target: eslint                  - JavaScript code style using eslint.
 .PHONY: eslint
 eslint: prepare
@@ -206,6 +245,8 @@ ifneq (,$(wildcard .eslintrc.json))
 	@$(call HELPTEXT,$@)
 	$(ESLINT) $(SRC) | tee $(BUILD)/eslint
 endif
+
+
 
 # target: eslint-fix              - JavaScript code style using eslint (fix).
 .PHONY: eslint-fix
