@@ -1,0 +1,9 @@
+version: "3"
+services:
+    tomato:
+        build: .
+        container_name: "tomato"
+        volumes:
+            - "./:/tomato/"
+        restart:
+            "always"
