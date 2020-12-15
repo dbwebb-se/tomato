@@ -2,5 +2,6 @@
 build/
 composer.lock
 package-lock.json
+.phpunit.result.cache
 node_modules/
 vendor/

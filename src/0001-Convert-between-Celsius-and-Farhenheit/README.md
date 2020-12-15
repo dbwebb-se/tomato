@@ -26,9 +26,11 @@ References
 Prepare
 -------------------------------------
 
-<!-- start php -->
-No specific preparations are needed.
-<!-- end php -->
+Install the development environment.
+
+```
+make install
+```
 
 
 

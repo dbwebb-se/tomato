@@ -65,6 +65,7 @@ help:
 BIN     := .bin
 BUILD   := build
 SRC     := src
+OUTPUT  := .output
 
 # PHP
 VENDOR  := vendor
@@ -74,11 +75,12 @@ PHPCS   := $(BIN)/phpcs
 PHPCBF  := $(BIN)/phpcbf
 PHPMD   := $(BIN)/phpmd
 PHPSTAN := $(VBIN)/phpstan
+PHPUNIT := $(VBIN)/phpunit
 
 # JavaScript
 NODE   := node
 NPM    := npm
-ESLINT := npx eslint #node_modules/.bin/eslint
+ESLINT := npx eslint
 
 
 
@@ -91,7 +93,7 @@ ESLINT := npx eslint #node_modules/.bin/eslint
 prepare:
 	@$(call HELPTEXT,$@)
 	install -d -m 0755 $(BUILD)
-	rm -f $(BUILD)/*
+	rm -rf $(BUILD)/*
 
 
 
@@ -111,18 +113,33 @@ check: check-js check-php
 
 
 
-# target: test                    - Run all tests.
+# target: analyse                 - Run all static code analysis.
+.PHONY: analyse
+analyse: prepare phpcs phpmd phpstan eslint
+	@$(call HELPTEXT,$@)
+
+
+
+# target: unittest                - Run all unittests.
+.PHONY: unittest
+unittest: prepare
+	@$(call HELPTEXT,$@)
+
+
+
+# target: test                    - Run all analysis and tests.
 .PHONY: test
-test: prepare phpcs phpmd phpstan eslint
+test: analyse unittest
 	@$(call HELPTEXT,$@)
 
 
 
 # target: clean                   - Remove all generated files.
-.PHONY:  clean
+.PHONY: clean
 clean:
 	@$(call HELPTEXT,$@)
 	rm -rf $(BUILD)
+	rm -f .phpunit.result.cache
 
 
 
@@ -133,6 +150,50 @@ clean-all: clean
 	rm -rf $(BIN)
 	rm -rf $(VENDOR) composer.lock
 	rm -f package-lock.json
+
+
+
+# target: all                     - Check tomato in all aspects.
+.PHONY: all
+all: clean install analyse test
+	@$(call HELPTEXT,$@)
+
+
+
+# ----------------------------------------------------------------------------
+#
+# Local targets?
+#
+# target: output                  - Create output (dev only).
+.PHONY: output
+output:
+ifneq (,$(wildcard .output))
+	@$(call HELPTEXT,$@)
+	php $(SRC)/convert_1.php > $(OUTPUT)/convert_1.php
+	php $(SRC)/convert_2.php > $(OUTPUT)/convert_2.php
+	node $(SRC)/convert_1.js > $(OUTPUT)/convert_1.js
+	node $(SRC)/convert_2.js > $(OUTPUT)/convert_2.js
+endif
+
+# target: level1                  - Check Level 1 entry tests.
+.PHONY: level1
+level1: level1-php
+	@$(call HELPTEXT,$@)
+
+# target: level1-php              - Check Level 1 entry tests (PHP).
+.PHONY: level1-php
+level1-php:
+	@$(call HELPTEXT,$@)
+	@$(call ASSERT_FILE_EXISTS, $(SRC)/convert_1.php)
+
+	@[ ! -f $(SRC)/convert_1.php ] \
+		|| printf "$(ERROR_COLOR) Missing file '$(SRC)/convert_1.php'.\n"
+
+# target: level1-js               - Check Level 1 entry tests (JavaScript).
+.PHONY: level1-js
+level1-js:
+	@$(call HELPTEXT,$@)
+
 
 
 
@@ -163,6 +224,7 @@ ifneq (,$(wildcard .php*))
 	@[ ! -f .phpcs.xml ] || $(call CHECK_VERSION, $(PHPCBF), | head -1)
 	@[ ! -f .phpmd.xml ] || $(call CHECK_VERSION, $(PHPMD), | head -1)
 	@[ ! -f .phpstan.neon ] || $(call CHECK_VERSION, $(PHPSTAN), | head -1)
+	@[ ! -f .phpunit.xml ] || $(call CHECK_VERSION, $(PHPUNIT), | head -1)
 endif
 
 
@@ -201,6 +263,16 @@ phpstan: prepare
 ifneq (,$(wildcard .phpstan.neon))
 	@$(call HELPTEXT,$@)
 	$(PHPSTAN) analyse -c .phpstan.neon $(SRC) | tee $(BUILD)/phpstan
+endif
+
+
+
+# target: phpunit                 - PHP unit test using phpunit.
+.PHONY: phpunit
+phpunit: prepare
+ifneq (,$(wildcard .phpunit.xml))
+	@$(call HELPTEXT,$@)
+	$(PHPUNIT) --configuration .phpunit.xml $(options)
 endif
 
 
