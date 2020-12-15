@@ -36,7 +36,7 @@ THIS_MAKEFILE := $(call WHERE-AM-I)
 HELPTEXT = $(call ACTION_MESSAGE, $(shell egrep "^\# target: $(1) " $(THIS_MAKEFILE) | sed "s/\# target: $(1)[ ]*-[ ]* / /g"))
 
 # Check version  and path to command and display on one line
-CHECK_VERSION = printf "%-15s %-13s %s\n" "`basename $(1)`" "`$(1) --version $(2)`" "`which $(1)`"
+CHECK_VERSION = printf "%-30s %-13s\n" "$(1)" "`$(1) --version $(2)`"
 
 # Get current working directory, it may not exist as environment variable.
 PWD = $(shell pwd)
@@ -74,24 +74,29 @@ PHPCBF  := $(BIN)/phpcbf
 PHPMD   := $(BIN)/phpmd
 PHPSTAN := $(VBIN)/phpstan
 
+# JavaScript
+ESLINT := node_modules/.bin/eslint
+
 
 
 # ----------------------------------------------------------------------------
 #
 # Highlevel targets
 #
-# target: prepare                 - Prepare the build directory.
+# target: prepare                 - Prepare to build and test.
 .PHONY: prepare
 prepare:
 	@$(call HELPTEXT,$@)
-	install -d -m 0755 $(BIN) $(BUILD)
+	install -d -m 0755 $(BUILD)
+	rm $(BUILD)/*
 
 
 
 # target: install                 - Install needed utilities locally.
 .PHONY: install
-install: prepare
+install:
 	@$(call HELPTEXT,$@)
+	install -d -m 0755 $(BIN)
 
 	@# PHP
 	[ ! -f .phpcs.xml ] || curl -Lso $(PHPCS) https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar && chmod 755 $(PHPCS)
@@ -108,18 +113,24 @@ install: prepare
 .PHONY: check
 check:
 	@$(call HELPTEXT,$@)
+
+	# General
 	@$(call CHECK_VERSION, make, | head -1)
+
 	# PHP
 	@[ ! -f .phpcs.xml ] || $(call CHECK_VERSION, $(PHPCS), | head -1)
 	@[ ! -f .phpcs.xml ] || $(call CHECK_VERSION, $(PHPCBF), | head -1)
 	@[ ! -f .phpmd.xml ] || $(call CHECK_VERSION, $(PHPMD), | head -1)
 	@[ ! -f .phpstan.neon ] || $(call CHECK_VERSION, $(PHPSTAN), | head -1)
 
+	# JavaScript
+	@[ ! -f .eslintrc.json ] || $(call CHECK_VERSION, $(ESLINT), | head -1)
+
 
 
 # target: test                    - Run all tests.
 .PHONY: test
-test: phpcs phpmd phpstan
+test: prepare phpcs phpmd phpstan eslint
 	@$(call HELPTEXT,$@)
 
 
@@ -128,6 +139,7 @@ test: phpcs phpmd phpstan
 .PHONY:  clean
 clean:
 	@$(call HELPTEXT,$@)
+	rm -rf $(BUILD)
 
 
 
@@ -135,41 +147,68 @@ clean:
 .PHONY:  clean-all
 clean-all: clean
 	@$(call HELPTEXT,$@)
-	rm -rf $(BIN) $(BUILD)
+	rm -rf $(BIN)
 	rm -rf $(VENDOR) composer.lock
+	rm -f package-lock.json
 
 
 
 # ----------------------------------------------------------------------------
 #
-# Specific targets
+# PHP specific targets
 #
-# target: phpcs                   - PHP Code Style using phpcs.
+# target: phpcs                   - PHP code style using phpcs.
 .PHONY: phpcs
-phpcs:
+phpcs: prepare
+ifneq (,$(wildcard .phpcs.xml))
 	@$(call HELPTEXT,$@)
-	[ ! -f .phpcs.xml ] || $(PHPCS) --standard=.phpcs.xml $(SRC) | tee $(BUILD)/phpcs
+	$(PHPCS) --standard=.phpcs.xml $(SRC) | tee $(BUILD)/phpcs
+endif
 
 
 
-# target: phpcs-fix               - PHP Code Style using phpcbf (fix).
+# target: phpcs-fix               - PHP code style using phpcbf (fix).
 .PHONY: phpcs-fix
-phpcs-fix:
+phpcs-fix: prepare
 	@$(call HELPTEXT,$@)
 	[ ! -f .phpcs.xml ] || $(PHPCBF) --standard=.phpcs.xml $(SRC) | tee $(BUILD)/phpcbf
 
 
 
-# target: phpmd                   - PHP Mess detector using phpmd.
+# target: phpmd                   - PHP mess detector using phpmd.
 .PHONY: phpmd
-phpmd:
+phpmd: prepare
+ifneq (,$(wildcard .phpmd.xml))
 	@$(call HELPTEXT,$@)
-	[ ! -f .phpmd.xml ] || $(PHPMD) $(SRC) text .phpmd.xml | tee $(BUILD)/phpmd
+	$(PHPMD) $(SRC) text .phpmd.xml | tee $(BUILD)/phpmd
+endif
 
 
 
 # target: phpstan                 - PHP code analysis using phpstan.
 .PHONY: phpstan
-phpstan:
+phpstan: prepare
+ifneq (,$(wildcard .phpstan.neon))
 	@$(call HELPTEXT,$@)
-	[ ! -f .phpstan.neon ] || $(PHPSTAN) analyse -c .phpstan.neon $(SRC) | tee $(BUILD)/phpstan
+	$(PHPSTAN) analyse -c .phpstan.neon $(SRC) | tee $(BUILD)/phpstan
+endif
+
+
+
+# ----------------------------------------------------------------------------
+#
+# JavaScript specific targets
+#
+# target: eslint                  - JavaScript code style using eslint.
+.PHONY: eslint
+eslint: prepare
+ifneq (,$(wildcard .eslintrc.json))
+	@$(call HELPTEXT,$@)
+	$(ESLINT) $(SRC) | tee $(BUILD)/eslint
+endif
+
+# target: eslint-fix              - JavaScript code style using eslint (fix).
+.PHONY: eslint-fix
+eslint-fix: prepare
+	@$(call HELPTEXT,$@)
+	[ ! -f .eslintrc.json ] || $(ESLINT) $(SRC) --fix | tee $(BUILD)/eslint
