@@ -97,18 +97,9 @@ prepare:
 
 # target: install                 - Install needed utilities locally.
 .PHONY: install
-install:
+install: install-js install-php
 	@$(call HELPTEXT,$@)
 	install -d -m 0755 $(BIN)
-
-	@# PHP
-	[ ! -f .phpcs.xml ] || curl -Lso $(PHPCS) https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar && chmod 755 $(PHPCS)
-	[ ! -f .phpcs.xml ] || curl -Lso $(PHPCBF) https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar && chmod 755 $(PHPCBF)
-	[ ! -f .phpmd.xml ] || curl -Lso $(PHPMD) https://github.com/phpmd/phpmd/releases/download/2.9.1/phpmd.phar && chmod 755 $(PHPMD)
-	[ ! -f composer.json ] || composer install
-
-	@# JavaScript
-	[ ! -f package.json ] || npm install
 
 
 
