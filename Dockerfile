@@ -7,5 +7,3 @@ RUN apk add --update \
 WORKDIR /tomato
 
 RUN npm install -g eslint
-
-ENTRYPOINT ["/bin/bash"]
