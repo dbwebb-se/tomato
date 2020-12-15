@@ -5,11 +5,11 @@ The degree Celsius is a unit of temperature on the Celsius scale a temperature s
 
 The Fahrenheit scale is a temperature scale based on one proposed in 1724 by the physicist Daniel Gabriel Fahrenheit. On the Fahrenheit scale, the freezing point of water is 32°F and the boiling point is 212°F (at standard atmospheric pressure).
 
-This is how to convert Celcius to Farenheit.
+This is how to convert Celsius to Farenheit.
 
 `[°C] = ([°F] − 32) × ​5⁄9`
 
-This is how to convert Farenheit to Celcius.
+This is how to convert Farenheit to Celsius.
 
 `[°C] = ([°F] − 32) × ​5⁄9`
 
@@ -45,10 +45,45 @@ php convert_1.php
 ```
 <!-- end php -->
 
-Write code to convert Celcius degrees to Farenheit degrees. When your code is executed it should produce an output that show the degrees for the water freezing point and the water boiling point.
+Write code to convert Celsius degrees to Farenheit degrees. When your code is executed it should produce an output that show the degrees for the water freezing point and the water boiling point.
 
 ```
 C - F
 0 - 32
-100 - 100
+100 - 212
+```
+
+
+
+Level 2
+-------------------------------------
+
+<!-- start php -->
+Save your code in `convert_2.php`.
+
+Execute the program as:
+
+```
+php convert_2.php
+```
+<!-- end php -->
+
+Write code to convert between Celsius degrees to Farenheit degrees. Show a table with conversions between 0 °C and 100 °C with a step of 10 °C.
+
+The table should be formatted like this.
+
+```
+|  C  |  F  |
+|-----|-----|
+|   0 |  32 |
+|  10 |  50 |
+|  20 |  68 |
+|  30 |  86 |
+|  40 | 104 |
+|  50 | 122 |
+|  60 | 140 |
+|  70 | 158 |
+|  80 | 176 |
+|  90 | 194 |
+| 100 | 212 |
 ```
