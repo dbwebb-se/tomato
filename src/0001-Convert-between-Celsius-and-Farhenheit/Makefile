@@ -99,7 +99,6 @@ prepare:
 .PHONY: install
 install: install-js install-php
 	@$(call HELPTEXT,$@)
-	install -d -m 0755 $(BIN)
 
 
 
@@ -144,9 +143,12 @@ clean-all: clean
 # target: install-php             - Install PHP utilities.
 .PHONY: install-php
 install-php:
-ifneq (,$(wildcard package.json))
+ifneq (,$(wildcard .php*))
 	@$(call HELPTEXT,$@)
-	npm install
+	[ ! -f composer.json ] || composer install
+	[ ! -f .phpcs.xml ] || curl -Lso $(PHPCS) https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar && chmod 755 $(PHPCS)
+	[ ! -f .phpcs.xml ] || curl -Lso $(PHPCBF) https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar && chmod 755 $(PHPCBF)
+	[ ! -f .phpmd.xml ] || curl -Lso $(PHPMD) https://github.com/phpmd/phpmd/releases/download/2.9.1/phpmd.phar && chmod 755 $(PHPMD)
 endif
 
 
