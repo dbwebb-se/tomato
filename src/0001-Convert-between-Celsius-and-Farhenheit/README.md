@@ -45,6 +45,16 @@ php convert_1.php
 ```
 <!-- end php -->
 
+<!-- start javascript -->
+Save your code in `convert_1.js`.
+
+Execute the program as:
+
+```
+node convert_1.js
+```
+<!-- end javascript -->
+
 Write code to convert Celsius degrees to Farenheit degrees. When your code is executed it should produce an output that show the degrees for the water freezing point and the water boiling point.
 
 ```
