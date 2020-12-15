@@ -7,3 +7,4 @@ services:
             - "./:/tomato/"
         restart:
             "always"
+        command: ["echo", "yay"]
