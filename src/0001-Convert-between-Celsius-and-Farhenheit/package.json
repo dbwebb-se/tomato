@@ -1,7 +1,8 @@
 {
   "name": "tomato",
   "version": "1.0.0",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "eslint": "^7.15.0"
   }
 }

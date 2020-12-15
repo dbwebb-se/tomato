@@ -9,7 +9,13 @@ console.log(`|-----|-----|`);
 let celsius = celsiusLow;
 
 while (celsius <= celsiusHigh) {
+    let cel, far;
+
     farenheit = celsius * 9 / 5 + 32;
-    console.log(`| ${celsius.toString().padStart(3, " ")} | ${farenheit.toString().padStart(3, " ")} |`);
+
+    cel = celsius.toString().padStart(3, " ");
+    far = farenheit.toString().padStart(3, " ");
+
+    console.log(`| ${cel} | ${far} |`);
     celsius += step;
 }
