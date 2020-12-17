@@ -5,13 +5,12 @@ import chaiExecAsync from '@jsdevtools/chai-exec';
 
 import {OUTPUT, SOURCE} from './config.mjs';
 
-const expect = chai.expect;
-
 chai.use(chaifs);
 chai.use(chaiExecAsync);
 chai.use(chaiFiles);
 
-let file = chaiFiles.file;
+const file = chaiFiles.file;
+const expect = chai.expect;
 
 describe('Testsuite for Level 1', () => {
     let sourceFile;
