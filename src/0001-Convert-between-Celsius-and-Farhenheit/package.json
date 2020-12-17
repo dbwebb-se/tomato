@@ -1,7 +1,15 @@
 {
   "name": "tomato",
   "version": "1.0.0",
-  "dependencies": {},
+  "scripts": {
+    "test": "mocha '.test/mocha/Level*.mjs'"
+  },
+  "dependencies": {
+    "@jsdevtools/chai-exec": "^2.1.1",
+    "chai": "^4.2.0",
+    "chai-fs": "^2.0.0",
+    "mocha": "^8.2.1"
+  },
   "devDependencies": {
     "eslint": "^7.15.0",
     "eslint-config-standard": "^16.0.2",
