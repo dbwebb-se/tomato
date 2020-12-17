@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaifs from 'chai-fs';
-import * as fs from 'fs';
+import chaiFiles from 'chai-files';
 import chaiExecAsync from '@jsdevtools/chai-exec';
 
 import {OUTPUT, SOURCE} from './config.mjs';
@@ -9,6 +9,9 @@ const expect = chai.expect;
 
 chai.use(chaifs);
 chai.use(chaiExecAsync);
+chai.use(chaiFiles);
+
+let file = chaiFiles.file;
 
 describe('Testsuite for Level 1', () => {
     let sourceFile;
@@ -20,17 +23,6 @@ describe('Testsuite for Level 1', () => {
         outputFile = `${OUTPUT}/convert_1.js`;
 
         /**
-        * Runs before all tests in this block.
-        */
-        before(function(done) {
-            fs.readFile(outputFile, 'utf8', function(err, fileContents) {
-                if (err) throw err;
-                outputFileContent = fileContents;
-                done();
-            });
-        })
-
-        /**
         * Check that the file(s) are there.
         */
         it('The file is present', (done) => {
@@ -43,7 +35,7 @@ describe('Testsuite for Level 1', () => {
         */
         it("should match output", async () => {
             let srcExec = await chaiExecAsync(`node ${sourceFile}`);
-            expect(srcExec).stdout.to.contain(outputFileContent);
+            expect(srcExec).stdout.to.equal(file(outputFile));
         });
     });
 
@@ -52,17 +44,6 @@ describe('Testsuite for Level 1', () => {
         outputFile = `${OUTPUT}/convert_2.js`;
 
         /**
-        * Runs before all tests in this block.
-        */
-        before(function(done) {
-            fs.readFile(outputFile, 'utf8', function(err, fileContents) {
-                if (err) throw err;
-                outputFileContent = fileContents;
-                done();
-            });
-        })
-
-        /**
         * Check that the file(s) are there.
         */
         it('The file is present', (done) => {
@@ -75,7 +56,7 @@ describe('Testsuite for Level 1', () => {
         */
         it("should match output", async () => {
             let srcExec = await chaiExecAsync(`node ${sourceFile}`);
-            expect(srcExec).stdout.to.contain(outputFileContent);
+            expect(srcExec).stdout.to.equal(file(outputFile));
         });
     });
 });
