@@ -2,7 +2,7 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap=".test/phpunit/config.php" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
   <testsuites>
     <testsuite name="all">
-      <directory>.test/phpunit</directory>
+      <directory>.tomato/test/phpunit</directory>
     </testsuite>
   </testsuites>
   <logging/>

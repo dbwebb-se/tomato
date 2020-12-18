@@ -65,7 +65,11 @@ help:
 BIN     := .bin
 BUILD   := build
 SRC     := src
-OUTPUT  := .output
+TOMATO  := .tomato
+
+# Bats
+BATS    := npx bats
+BATS_TEST := $(TOMATO)/test/bats
 
 # PHP
 VENDOR  := vendor
@@ -164,36 +168,23 @@ all: clean install analyse test
 #
 # Local targets?
 #
-# target: output                  - Create output (dev only).
-.PHONY: output
-output:
-ifneq (,$(wildcard .output))
-	@$(call HELPTEXT,$@)
-	php $(SRC)/convert_1.php > $(OUTPUT)/convert_1.php
-	php $(SRC)/convert_2.php > $(OUTPUT)/convert_2.php
-	node $(SRC)/convert_1.js > $(OUTPUT)/convert_1.js
-	node $(SRC)/convert_2.js > $(OUTPUT)/convert_2.js
-endif
-
 # target: level1                  - Check Level 1 entry tests.
 .PHONY: level1
-level1: level1-php
+level1:
 	@$(call HELPTEXT,$@)
+	$(BATS) $(BATS_TEST)/php/Level1.bats
 
-# target: level1-php              - Check Level 1 entry tests (PHP).
-.PHONY: level1-php
-level1-php:
-	@$(call HELPTEXT,$@)
-	@$(call ASSERT_FILE_EXISTS, $(SRC)/convert_1.php)
 
-	@[ ! -f $(SRC)/convert_1.php ] \
-		|| printf "$(ERROR_COLOR) Missing file '$(SRC)/convert_1.php'.\n"
 
-# target: level1-js               - Check Level 1 entry tests (JavaScript).
-.PHONY: level1-js
-level1-js:
-	@$(call HELPTEXT,$@)
 
+# ----------------------------------------------------------------------------
+#
+# BATS specific targets
+#
+# target: bats                    - Run all tests (BATS).
+.PHONY: bats
+bats:
+	$(BATS) -r $(BATS_TEST)
 
 
 
