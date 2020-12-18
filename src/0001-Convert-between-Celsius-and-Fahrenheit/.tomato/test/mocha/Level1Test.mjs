@@ -19,7 +19,7 @@ describe('Testsuite for Level 1', () => {
 
     describe("Convert 1", () => {
         sourceFile = `${SOURCE}/convert_1.js`;
-        outputFile = `${OUTPUT}/convert_1.js`;
+        outputFile = `${OUTPUT}/convert_1.txt`;
 
         /**
         * Check that the file(s) are there.
@@ -40,7 +40,7 @@ describe('Testsuite for Level 1', () => {
 
     describe("Convert 2", () => {
         sourceFile = `${SOURCE}/convert_2.js`;
-        outputFile = `${OUTPUT}/convert_2.js`;
+        outputFile = `${OUTPUT}/convert_2.txt`;
 
         /**
         * Check that the file(s) are there.
