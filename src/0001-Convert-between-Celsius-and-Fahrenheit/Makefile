@@ -206,6 +206,7 @@ level1-js:
 install-php:
 ifneq (,$(wildcard .php*))
 	@$(call HELPTEXT,$@)
+	[ -d $(BIN) ] || install -d -m 0755 $(BIN)
 	[ ! -f composer.json ] || composer install
 	[ ! -f .phpcs.xml ] || curl -Lso $(PHPCS) https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar && chmod 755 $(PHPCS)
 	[ ! -f .phpcs.xml ] || curl -Lso $(PHPCBF) https://squizlabs.github.io/PHP_CodeSniffer/phpcbf.phar && chmod 755 $(PHPCBF)
