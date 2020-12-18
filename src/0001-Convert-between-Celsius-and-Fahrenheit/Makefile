@@ -128,7 +128,7 @@ analyse: prepare phpcs phpmd phpstan eslint
 
 # target: unittest                - Run all unittests.
 .PHONY: unittest
-unittest: prepare
+unittest: prepare phpunit mocha
 	@$(call HELPTEXT,$@)
 
 
