@@ -133,7 +133,7 @@ unittest: prepare
 
 # target: test                    - Run all analysis and tests.
 .PHONY: test
-test: analyse unittest
+test: bats analyse unittest
 	@$(call HELPTEXT,$@)
 
 
