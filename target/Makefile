@@ -116,6 +116,7 @@ check: check-js check-php
 	@$(call HELPTEXT,$@)
 	@$(call CHECK_VERSION, bash, | head -1)
 	@$(call CHECK_VERSION, make, | head -1)
+	@$(call CHECK_VERSION, $(BATS), | head -1)
 
 
 
@@ -294,6 +295,7 @@ ifneq (,$(wildcard .eslintrc.json))
 	@$(call CHECK_VERSION, $(NODE), | head -1)
 	@$(call CHECK_VERSION, $(NPM), | head -1)
 	@[ ! -f .eslintrc.json ] || $(call CHECK_VERSION, $(ESLINT), | head -1)
+	@$(call CHECK_VERSION, $(MOCHA), | head -1)
 endif
 
 
