@@ -85,6 +85,8 @@ PHPUNIT := $(VBIN)/phpunit
 NODE   := node
 NPM    := npm
 ESLINT := npx eslint
+MOCHA  := npx mocha
+MOCHA_TEST := $(TOMATO)/test/mocha
 
 
 
@@ -173,6 +175,7 @@ all: clean install analyse test
 level1:
 	@$(call HELPTEXT,$@)
 	$(BATS) $(BATS_TEST)/php/Level1.bats
+	$(BATS) $(BATS_TEST)/javascript/Level1.bats
 
 
 
@@ -310,3 +313,12 @@ endif
 eslint-fix: prepare
 	@$(call HELPTEXT,$@)
 	[ ! -f .eslintrc.json ] || $(ESLINT) $(SRC) --fix | tee $(BUILD)/eslint
+
+
+# target: mocha                   - JavaScript unit test (Mocha).
+.PHONY: mocha
+mocha: prepare
+ifneq (,$(wildcard $(MOCHA_TEST)))
+	@$(call HELPTEXT,$@)
+	$(MOCHA) $(MOCHA_TEST)
+endif
