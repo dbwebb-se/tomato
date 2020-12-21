@@ -1,2 +1,2 @@
-JAVASCRIPT=true
-PHP=true
+LANG_JS=true
+LANG_PHP=true

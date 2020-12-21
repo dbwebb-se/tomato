@@ -62,7 +62,8 @@ help:
 #SHELL := env PATH='$(PATH)' $(SHELL)
 
 # # Tools
-BIN     := ../.bin
+BASE := ..
+BIN     := $(BASE)/.bin
 BUILD   := build
 SRC     := src
 TOMATO  := .tomato
@@ -74,7 +75,7 @@ BATS    := npx bats
 BATS_TEST := $(TOMATO)/test/bats
 
 # PHP
-VENDOR  := ../vendor
+VENDOR  := $(BASE)/vendor
 VBIN    := $(VENDOR)/bin
 PHP     := php
 PHPCS   := $(BIN)/phpcs
@@ -82,6 +83,7 @@ PHPCBF  := $(BIN)/phpcbf
 PHPMD   := $(BIN)/phpmd
 PHPSTAN := $(VBIN)/phpstan
 PHPUNIT := $(VBIN)/phpunit
+PHPUNIT_TEST := $(TOMATO)/test/phpunit
 
 # JavaScript
 NODE   := node
@@ -96,42 +98,92 @@ MOCHA_TEST := $(TOMATO)/test/mocha
 #
 # Local exercise targets
 #
-# target: level1                  - Check Level 1 tests.
+# target: level1                  - Check Level 1.
 .PHONY: level1
-level1:
+level1: prepare
 	@$(call HELPTEXT,$@)
-ifeq ($(PHP), true)
-	$(BATS) $(BATS_TEST)/php/Level1.bats
+ifeq ($(LANG_PHP), true)
+	@printf " %-10s..." "bats"
+	@$(BATS) $(BATS_TEST)/php/Level1.bats > $(BUILD)/phpcs
+	@printf " ok.\n"
+ifneq (,$(wildcard $(BASE)/.phpcs.xml))
+	@printf " %-10s..." "phpcs"
+	@$(PHPCS) --standard=$(BASE)/.phpcs.xml $(SRC) > $(BUILD)/phpcs
+	@printf " ok.\n"
 endif
-ifeq ($(JAVASCRIPT), true)
+ifneq (,$(wildcard $(BASE)/.phpmd.xml))
+	@printf " %-10s..." "phpmd"
+	@$(PHPMD) $(SRC) text $(BASE)/.phpmd.xml > $(BUILD)/phpmd
+	@printf " ok.\n"
+endif
+ifneq (,$(wildcard $(BASE)/.phpstan.neon))
+	@printf " %-10s..." "phpstan"
+	@$(PHPSTAN) analyse -c $(BASE)/.phpstan.neon -q $(SRC) &> $(BUILD)/phpstan
+	@printf " ok.\n"
+endif
+ifneq (,$(wildcard $(BASE)/.phpunit.xml))
+	@printf " %-10s..." "phpunit"
+	@$(PHPUNIT) --configuration $(BASE)/.phpunit.xml --bootstrap $(PHPUNIT_TEST)/config.php $(PHPUNIT_TEST) > $(BUILD)/phpunit
+	@printf " ok.\n"
+endif
+endif
+
+ifeq ($(LANG_JS), true)
 	$(BATS) $(BATS_TEST)/javascript/Level1.bats
 endif
 
 
 
-# target: level2                  - Check Level 2 tests.
+# target: level2                  - Check Level 2.
 .PHONY: level2
 level2:
 	@$(call HELPTEXT,$@)
 ifeq ($(PHP), true)
-	$(BATS) $(BATS_TEST)/php/Level1.bats
+	$(BATS) $(BATS_TEST)/php/Level2.bats
 endif
 ifeq ($(JAVASCRIPT), true)
-	$(BATS) $(BATS_TEST)/javascript/Level1.bats
+	$(BATS) $(BATS_TEST)/javascript/Level2.bats
 endif
 
 
 
-# target: level3                  - Check Level 3 tests.
+# target: level3                  - Check Level 3.
 .PHONY: level3
 level3:
 	@$(call HELPTEXT,$@)
 ifeq ($(PHP), true)
-	$(BATS) $(BATS_TEST)/php/Level1.bats
+	$(BATS) $(BATS_TEST)/php/Level3.bats
 endif
 ifeq ($(JAVASCRIPT), true)
-	$(BATS) $(BATS_TEST)/javascript/Level1.bats
+	$(BATS) $(BATS_TEST)/javascript/Level3.bats
 endif
+
+
+
+# target: level4                  - Check Level 4.
+.PHONY: level4
+level4:
+	@$(call HELPTEXT,$@)
+ifeq ($(PHP), true)
+	$(BATS) $(BATS_TEST)/php/Level4.bats
+endif
+ifeq ($(JAVASCRIPT), true)
+	$(BATS) $(BATS_TEST)/javascript/Level4.bats
+endif
+
+
+
+# target: level5                  - Check Level 5.
+.PHONY: level5
+level5:
+	@$(call HELPTEXT,$@)
+ifeq ($(PHP), true)
+	$(BATS) $(BATS_TEST)/php/Level5.bats
+endif
+ifeq ($(JAVASCRIPT), true)
+	$(BATS) $(BATS_TEST)/javascript/Level5.bats
+endif
+
 
 
 
@@ -148,6 +200,14 @@ prepare:
 
 
 
+# target: clean                   - Remove all generated files.
+.PHONY: clean
+clean:
+	@$(call HELPTEXT,$@)
+	rm -rf $(BUILD)
+
+
+
 # ----------------------------------------------------------------------------
 #
 # PHP specific targets
@@ -155,9 +215,9 @@ prepare:
 # target: phpcs                   - PHP code style using phpcs.
 .PHONY: phpcs
 phpcs: prepare
-ifneq (,$(wildcard ../.phpcs.xml))
+ifneq (,$(wildcard $(BASE)/.phpcs.xml))
 	@$(call HELPTEXT,$@)
-	$(PHPCS) --standard=../.phpcs.xml $(SRC) | tee $(BUILD)/phpcs
+	$(PHPCS) --standard=$(BASE)/.phpcs.xml $(SRC) | tee $(BUILD)/phpcs
 endif
 
 
@@ -166,16 +226,16 @@ endif
 .PHONY: phpcs-fix
 phpcs-fix: prepare
 	@$(call HELPTEXT,$@)
-	[ ! -f .phpcs.xml ] || $(PHPCBF) --standard=.phpcs.xml $(SRC) | tee $(BUILD)/phpcbf
+	[ ! -f $(BASE)/.phpcs.xml ] || $(PHPCBF) --standard=$(BASE)/.phpcs.xml $(SRC) | tee $(BUILD)/phpcbf
 
 
 
 # target: phpmd                   - PHP mess detector using phpmd.
 .PHONY: phpmd
 phpmd: prepare
-ifneq (,$(wildcard .phpmd.xml))
+ifneq (,$(wildcard $(BASE)/.phpmd.xml))
 	@$(call HELPTEXT,$@)
-	$(PHPMD) $(SRC) text .phpmd.xml | tee $(BUILD)/phpmd
+	$(PHPMD) $(SRC) text $(BASE)/.phpmd.xml | tee $(BUILD)/phpmd
 endif
 
 
@@ -183,9 +243,9 @@ endif
 # target: phpstan                 - PHP code analysis using phpstan.
 .PHONY: phpstan
 phpstan: prepare
-ifneq (,$(wildcard .phpstan.neon))
+ifneq (,$(wildcard $(BASE)/.phpstan.neon))
 	@$(call HELPTEXT,$@)
-	$(PHPSTAN) analyse -c .phpstan.neon $(SRC) | tee $(BUILD)/phpstan
+	$(PHPSTAN) analyse -c $(BASE)/.phpstan.neon $(SRC) | tee $(BUILD)/phpstan
 endif
 
 
@@ -193,9 +253,9 @@ endif
 # target: phpunit                 - PHP unit test using phpunit.
 .PHONY: phpunit
 phpunit: prepare
-ifneq (,$(wildcard .phpunit.xml))
+ifneq (,$(wildcard $(BASE)/.phpunit.xml))
 	@$(call HELPTEXT,$@)
-	$(PHPUNIT) --configuration .phpunit.xml $(options)
+	$(PHPUNIT) --configuration $(BASE)/.phpunit.xml --bootstrap $(PHPUNIT_TEST)/config.php $(PHPUNIT_TEST)
 endif
 
 
@@ -207,9 +267,9 @@ endif
 # target: eslint                  - JavaScript code style using eslint.
 .PHONY: eslint
 eslint: prepare
-ifneq (,$(wildcard .eslintrc.json))
+ifneq (,$(wildcard $(BASE)/.eslintrc.json))
 	@$(call HELPTEXT,$@)
-	$(ESLINT) $(SRC) | tee $(BUILD)/eslint
+	$(ESLINT) -c $(BASE)/.eslintrc.json $(SRC) | tee $(BUILD)/eslint
 endif
 
 
@@ -218,7 +278,7 @@ endif
 .PHONY: eslint-fix
 eslint-fix: prepare
 	@$(call HELPTEXT,$@)
-	[ ! -f .eslintrc.json ] || $(ESLINT) $(SRC) --fix | tee $(BUILD)/eslint
+	[ ! -f $(BASE)/.eslintrc.json ] || $(ESLINT) -c $(BASE)/.eslintrc.json  $(SRC) --fix | tee $(BUILD)/eslint
 
 
 # target: mocha                   - JavaScript unit test (Mocha).
